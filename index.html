@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менің балабақшам</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+        body { font-family: 'Comfortaa', cursive; background-color: #f0fdf4; user-select: none; }
+        .task-container { display: none; }
+        .task-container.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        
+        .video-card { 
+            cursor: pointer; border: 4px solid #e5e7eb; border-radius: 35px; 
+            overflow: hidden; background: black; aspect-ratio: 1 / 1;
+            position: relative; box-shadow: 0 8px 0 #e5e7eb; transition: all 0.2s ease;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        
+        .btn-nav { transition: 0.3s; box-shadow: 0 4px 0 #1e40af; }
+        .active-tab { background-color: #2563eb !important; color: white !important; transform: translateY(4px); box-shadow: none !important; }
+        
+        .item-card { 
+            cursor: pointer; border: 4px solid #e5e7eb; border-radius: 25px; 
+            padding: 15px; text-align: center; background: white; 
+            box-shadow: 0 6px 0 #e5e7eb; transition: 0.3s;
+        }
+
+        .drop-zone { border: 4px dashed #cbd5e1; border-radius: 30px; min-height: 200px; position: relative; background: #f8fafc; transition: 0.3s; }
+        .draggable { cursor: grab; touch-action: none; }
+        .draggable:active { cursor: grabbing; }
+
+        /* Жасыл неон обводкасы */
+        .neon-glow { 
+            filter: drop-shadow(0 0 15px #22c55e) drop-shadow(0 0 5px #22c55e);
+            border: 4px solid #22c55e;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="p-2 md:p-10">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-[50px] shadow-2xl overflow-hidden border-b-[15px] border-blue-100">
+        <div class="bg-blue-600 p-4 text-center text-white">
+            <h1 class="text-xl font-bold mb-4">Менің балабақшамдағы бір күнім🌈</h1>
+            <div class="flex flex-wrap justify-center gap-2" id="nav-btns">
+                </div>
+        </div>
+
+        <div class="p-6 min-h-[600px]">
+            <div id="task1" class="task-container active">
+                <h2 class="text-xl font-bold text-center mb-6">1. Амандасу</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="video-card" onclick="playInPlace(this)"><video poster="apay_preview.png"><source src="apay_video.mp4"></video></div>
+                    <div class="video-card" onclick="playInPlace(this)"><video poster="dostar_preview.png"><source src="dostar_video.mp4"></video></div>
+                </div>
+            </div>
+
+            <div id="task2" class="task-container">
+                <h2 class="text-xl font-bold text-center mb-4">2. Жаттығу</h2>
+                <div class="max-w-xs mx-auto mb-4">
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="jattygu_main.mp4"></video></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="j1.mp4"></video></div>
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="j2.mp4"></video></div>
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="j3.mp4"></video></div>
+                </div>
+            </div>
+
+            <div id="task3" class="task-container">
+                <h2 class="text-xl font-bold text-center mb-6">3. Тамақтану мәдениеті</h2>
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="video-card" onclick="playWithDelayedText(this)">
+                        <video><source src="as1.mp4"></video>
+                        <div class="hidden-text absolute inset-0 flex items-center justify-center bg-green-500/90 text-white font-bold text-lg opacity-0 transition-opacity duration-500 pointer-events-none">Ас дәмді болсын!</div>
+                    </div>
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="as2.mp4"></video></div>
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="as3.mp4"></video></div>
+                </div>
+            </div>
+
+            <div id="task4" class="task-container">
+                <h2 class="text-xl font-bold text-center mb-4">4. Қол жуу</h2>
+                <div class="max-w-[400px] mx-auto mb-6">
+                    <div class="video-card" id="handwash-main-video" onclick="playInPlace(this)">
+                        <video><source src="handwash_main.mp4"></video>
+                    </div>
+                </div>
+                <div class="flex justify-center gap-2 mb-8 min-h-[80px]" id="wash-steps-area"></div>
+                <div class="flex flex-wrap justify-center gap-4" id="wash-items-container">
+                    <div class="item-card wash-item" data-step="1" onclick="checkWashStep(this, 1)">💧 Су</div>
+                    <div class="item-card wash-item" data-step="2" onclick="checkWashStep(this, 2)">🧼 Сабын</div>
+                    <div class="item-card wash-item" data-step="3" onclick="checkWashStep(this, 3)">🫧 Көпірік</div>
+                    <div class="item-card wash-item" data-step="4" onclick="checkWashStep(this, 4)">💧 Су (шай)</div>
+                    <div class="item-card wash-item" data-step="5" onclick="checkWashStep(this, 5)">🧣 Орамал</div>
+                </div>
+            </div>
+
+            <div id="task5" class="task-container">
+                <h2 class="text-xl font-bold text-center mb-6">5. Оқу қызметі</h2>
+                <div class="max-w-[400px] mx-auto mb-6">
+                    <div class="video-card" onclick="this.querySelector('video').play(); this.style.borderColor='#22c55e'">
+                        <video controls style="pointer-events: auto;"><source src="ertegi.mp4"></video>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="item-card learn-item" onclick="celebrate(this)">🐘 Ермексаз</div>
+                    <div class="item-card learn-item" onclick="celebrate(this)">🎨 Сурет салу</div>
+                    <div class="item-card learn-item" onclick="celebrate(this)">✂️ Қию</div>
+                    <div class="item-card learn-item" onclick="celebrate(this)">🖼️ Жабыстыру</div>
+                </div>
+            </div>
+
+            <div id="task6" class="task-container">
+                <h2 class="text-xl font-bold text-center mb-6">6. Түскі ұйқы</h2>
+                <div class="flex justify-around items-end gap-6 flex-wrap">
+                    <div class="text-center w-64">
+                        <img src="boy_pajamas.png" id="pajama-boy" class="w-full mb-2 cursor-pointer transition-all duration-300" onclick="toggleNeon(this)">
+                        <p class="font-bold text-lg">Пижама кию</p>
+                    </div>
+                    
+                    <div class="text-center w-64">
+                        <div class="drop-zone w-full h-64 mb-2 flex items-center justify-center" id="chair-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <img src="chair.png" class="w-40 pointer-events-none z-0">
+                        </div>
+                        <p class="font-bold text-lg">Отырғышқа жина</p>
+                    </div>
+
+                    <div class="video-card w-64 h-64" onclick="playInPlace(this)">
+                        <video><source src="sleep_video.mp4"></video>
+                    </div>
+                </div>
+
+                <div class="mt-10 flex justify-center h-32 relative" id="clothes-origin">
+                    <img src="clothes_folded.png" id="folded-clothes" class="draggable w-32 z-10" draggable="true" ondragstart="drag(event)">
+                </div>
+            </div>
+
+            <div id="task7" class="task-container">
+                <h2 class="text-xl font-bold text-center mb-6">7. Серуен</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="tabigat1.mp4"></video></div>
+                    <div class="video-card" onclick="playInPlace(this)"><video><source src="tabigat2.mp4"></video></div>
+                </div>
+            </div>
+
+            <div id="task8" class="task-container text-center">
+                <h2 class="text-xl font-bold mb-6">8. Үйге кету</h2>
+                <div class="item-card border-dashed border-4 max-w-xs mx-auto" onclick="finishDay()">
+                    <img src="ana_photo.png" class="rounded-xl mb-2">
+                    <p>Анашым келді! ❤️</p>
+                </div>
+                <p id="bye-text" class="mt-4 text-xl font-bold text-blue-600 hidden">Сау болыңыз!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWashStep = 1;
+
+        // Навигация батырмаларын жасау
+        const navContainer = document.getElementById('nav-btns');
+        for(let i=1; i<=8; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.id = 'n' + i;
+            btn.className = `btn-nav w-10 h-10 bg-white text-blue-600 rounded-lg font-bold ${i==1?'active-tab':''}`;
+            btn.onclick = () => openTask(i);
+            navContainer.appendChild(btn);
+        }
+
+        function openTask(n) {
+            // 1. Беттерді ауыстыру
+            document.querySelectorAll('.task-container').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active-tab'));
+            document.getElementById('task' + n).classList.add('active');
+            document.getElementById('n' + n).classList.add('active-tab');
+
+            // 2. Барлық видеоны тоқтату
+            document.querySelectorAll('video').forEach(v => { 
+                v.pause(); 
+                v.currentTime = 0; 
+                v.closest('.video-card').style.borderColor = "#e5e7eb";
+            });
+
+            // 3. Тазалау (Reset) логикасы
+            resetTasks();
+        }
+
+        function resetTasks() {
+            // Қол жууды қалпына келтіру
+            currentWashStep = 1;
+            const washItems = document.querySelectorAll('.wash-item');
+            const washContainer = document.getElementById('wash-items-container');
+            const washArea = document.getElementById('wash-steps-area');
+            washArea.innerHTML = '';
+            washItems.forEach(item => {
+                item.style.backgroundColor = "white";
+                item.style.borderColor = "#e5e7eb";
+                washContainer.appendChild(item);
+            });
+
+            // Киімді орнына қайтару (Task 6)
+            const clothes = document.getElementById('folded-clothes');
+            const origin = document.getElementById('clothes-origin');
+            const dropZone = document.getElementById('chair-zone');
+            if(clothes && origin) {
+                clothes.style.position = "static";
+                origin.appendChild(clothes);
+                dropZone.style.backgroundColor = "#f8fafc";
+            }
+
+            // Пижама неонды алып тастау
+            document.getElementById('pajama-boy').classList.remove('neon-glow');
+
+            // Оқу қызметі түстерін тазалау
+            document.querySelectorAll('.learn-item').forEach(el => el.classList.remove('bg-green-100'));
+
+            // Ас мәзірі мәтінін жасыру
+            document.querySelectorAll('.hidden-text').forEach(t => t.classList.add('opacity-0'));
+
+            // Қоштасу мәтіні
+            document.getElementById('bye-text').classList.add('hidden');
+        }
+
+        function playInPlace(container) {
+            const v = container.querySelector('video');
+            if(v.paused) { 
+                v.play(); 
+                container.style.borderColor = "#22c55e"; 
+            } else { 
+                v.pause(); 
+                container.style.borderColor = "#e5e7eb"; 
+            }
+        }
+
+        function checkWashStep(el, step) {
+            if(step === currentWashStep) {
+                el.style.backgroundColor = "#dcfce7";
+                el.style.borderColor = "#22c55e";
+                document.getElementById('wash-steps-area').appendChild(el);
+                currentWashStep++;
+                if(currentWashStep > 5) confetti();
+            } else {
+                el.classList.add('bg-red-100');
+                setTimeout(() => el.classList.remove('bg-red-100'), 500);
+            }
+        }
+
+        // Drag & Drop
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+            var dropZone = ev.currentTarget;
+            
+            draggedElement.style.position = "absolute";
+            draggedElement.style.top = "50%";
+            draggedElement.style.left = "50%";
+            draggedElement.style.transform = "translate(-50%, -50%)";
+            
+            dropZone.appendChild(draggedElement);
+            dropZone.style.backgroundColor = "#dcfce7";
+            confetti();
+        }
+
+        function toggleNeon(el) {
+            el.classList.toggle('neon-glow');
+            if(el.classList.contains('neon-glow')) confetti();
+        }
+
+        function playWithDelayedText(container) {
+            const v = container.querySelector('video');
+            const txt = container.querySelector('.hidden-text');
+            v.play();
+            container.style.borderColor = "#22c55e";
+            v.onended = () => {
+                setTimeout(() => {
+                    txt.classList.remove('opacity-0');
+                    confetti();
+                }, 500);
+            };
+        }
+
+        function celebrate(el) { el.classList.add('bg-green-100'); confetti(); }
+        function finishDay() { document.getElementById('bye-text').classList.remove('hidden'); confetti(); }
+    </script>
+</body>
+</html>
